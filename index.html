@@ -1,0 +1,728 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BERR | Ege Kıyısında Arsa, Konut ve Proje Portföyü</title>
+<meta name="description" content="Aydın ve İzmir kıyı şeridinde deniz manzaralı, villa imarlı arsa portföyü. Arsa satış ve danışmanlığında BERR.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,600;0,700;1,500&family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+<script>
+/* =====================================================================
+   BERR — TEK DOSYA KURULUM AYARLARI
+   Aşağıdaki 6 değeri doldurunca site otomatik canlı veriye geçer.
+   Nereden bulunacağı: KURULUM-TEK-SAYFA.md dosyasına bak.
+   ===================================================================== */
+window.BERR_CONFIG = {
+  SHEET_ID: "",              // Google Sheet URL'sindeki /d/ ile /edit arasındaki kod
+  DRIVE_API_KEY: "",         // Google Cloud Console'dan alınan, Drive API'ye kısıtlı API key
+  FOLDER_ID_ARSA: "",        // WEB/PORTFOY/ARSA klasörünün Drive ID'si
+  FOLDER_ID_KONUT: "",       // WEB/PORTFOY/KONUT klasörünün Drive ID'si
+  FOLDER_ID_PROJE: "",       // WEB/PORTFOY/PROJE klasörünün Drive ID'si
+  FOLDER_ID_BANNER: "",      // WEB/BANNER/desktop klasörünün Drive ID'si
+  APPS_SCRIPT_URL: "",       // İletişim formu için deploy edilen Apps Script Web App URL'si
+  WHATSAPP_PHONE: "+905550000000"
+};
+</script>
+
+<style>
+:root{
+  --ink:#0B0B0C; --paper:#FAF8F1;
+  --onyx:#060606; --onyx-2:#111111; --onyx-3:#1A1A1A;
+  --gold-1:#D3A97C; --gold-2:#A9723C; --gold-3:#5C3E22;
+  --gold-grad:linear-gradient(135deg,#C89A6C 0%, #A9723C 55%, #5C3E22 100%);
+  --line:rgba(250,248,241,.10);
+  --muted:rgba(250,248,241,.62);
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+html{scroll-behavior:smooth;}
+body{background:var(--onyx);color:var(--paper);font-family:'Inter',system-ui,sans-serif;-webkit-font-smoothing:antialiased;}
+.disp{font-family:'Playfair Display',serif;}
+.mono{font-family:'JetBrains Mono',monospace;}
+a{color:inherit;text-decoration:none;}
+img{display:block;max-width:100%;}
+.wrap{max-width:1280px;margin:0 auto;padding:0 24px;}
+button{font-family:inherit;cursor:pointer;}
+
+/* nav */
+.navbar{position:sticky;top:0;z-index:50;background:rgba(6,6,6,.9);backdrop-filter:blur(10px);border-bottom:1px solid var(--line);}
+.navbar .wrap{height:76px;display:flex;align-items:center;justify-content:space-between;}
+.logo{font-family:'Playfair Display',serif;font-size:23px;font-weight:700;}
+.navlinks{display:flex;gap:26px;font-size:14px;font-weight:500;}
+.navlinks a{color:var(--muted);transition:color .2s;cursor:pointer;}
+.navlinks a:hover,.navlinks a.active{color:var(--gold-1);}
+.navlinks a.cta{background:var(--gold-grad);color:var(--onyx);padding:10px 18px;border-radius:999px;font-weight:700;}
+.burger{display:none;background:none;border:0;color:var(--paper);font-size:22px;}
+@media (max-width:860px){.navlinks{display:none;}.burger{display:block;}}
+
+/* generic */
+.section{padding:64px 0;}
+.section-h{display:flex;align-items:baseline;justify-content:space-between;gap:16px;margin-bottom:28px;flex-wrap:wrap;}
+.section-h h2{font-size:32px;}
+.section-h a{color:var(--gold-1);font-size:14px;font-weight:600;}
+.eyebrow{color:var(--gold-1);font-size:12px;letter-spacing:.12em;text-transform:uppercase;font-weight:700;margin-bottom:10px;}
+.muted{color:var(--muted);}
+.grid{display:grid;gap:22px;}
+.grid.cols-3{grid-template-columns:repeat(3,1fr);}
+.grid.cols-4{grid-template-columns:repeat(4,1fr);}
+@media (max-width:960px){.grid.cols-3,.grid.cols-4{grid-template-columns:repeat(2,1fr);}}
+@media (max-width:600px){.grid.cols-3,.grid.cols-4{grid-template-columns:1fr;}}
+
+/* card */
+.card{background:var(--onyx-2);border:1px solid var(--line);border-radius:16px;overflow:hidden;transition:transform .2s,border-color .2s;cursor:pointer;}
+.card:hover{transform:translateY(-4px);border-color:var(--gold-3);}
+.card .thumb{aspect-ratio:4/3;background:var(--onyx-3);position:relative;overflow:hidden;}
+.card .thumb img{width:100%;height:100%;object-fit:cover;}
+.card .badge{position:absolute;top:12px;left:12px;background:var(--gold-grad);color:var(--onyx);font-size:11px;font-weight:700;padding:5px 10px;border-radius:999px;}
+.card .body{padding:16px 18px 20px;}
+.card h3{font-size:17px;margin-bottom:6px;}
+.card .price{color:var(--gold-1);font-weight:700;font-size:16px;margin-top:8px;}
+.card .meta{font-size:13px;color:var(--muted);}
+
+/* hero */
+.hero{position:relative;min-height:78vh;display:flex;align-items:flex-end;background:var(--onyx-2);overflow:hidden;}
+.hero .bg{position:absolute;inset:0;}
+.hero .bg img{width:100%;height:100%;object-fit:cover;opacity:.55;}
+.hero .bg::after{content:"";position:absolute;inset:0;background:linear-gradient(0deg,var(--onyx) 5%,rgba(6,6,6,.2) 60%);}
+.hero-inner{position:relative;padding:60px 0;max-width:640px;}
+.hero-inner h1{font-size:52px;line-height:1.05;margin-bottom:16px;}
+@media (max-width:700px){.hero-inner h1{font-size:34px;}}
+.btn{display:inline-flex;align-items:center;gap:8px;background:var(--gold-grad);color:var(--onyx);font-weight:700;padding:14px 26px;border-radius:999px;border:0;font-size:15px;}
+.btn-outline{background:transparent;color:var(--paper);border:1px solid var(--line);}
+
+/* kategori tiles */
+.kat-tile{position:relative;border-radius:16px;overflow:hidden;aspect-ratio:1/1;background:var(--onyx-2);}
+.kat-tile img{width:100%;height:100%;object-fit:cover;opacity:.6;}
+.kat-tile .lbl{position:absolute;inset:auto 0 0 0;padding:18px;background:linear-gradient(0deg,rgba(0,0,0,.85),transparent);font-weight:700;}
+
+/* detay */
+.detail-gallery{display:grid;grid-template-columns:2fr 1fr;gap:10px;border-radius:16px;overflow:hidden;margin-bottom:32px;}
+.detail-gallery img{width:100%;height:100%;object-fit:cover;}
+.detail-gallery .side{display:grid;grid-template-rows:1fr 1fr;gap:10px;}
+@media (max-width:760px){.detail-gallery{grid-template-columns:1fr;}.detail-gallery .side{grid-template-rows:1fr;grid-auto-flow:column;}}
+.spec-table{width:100%;border-collapse:collapse;margin:24px 0;}
+.spec-table tr{border-bottom:1px solid var(--line);}
+.spec-table td{padding:12px 0;font-size:14px;}
+.spec-table td:first-child{color:var(--muted);width:45%;}
+
+/* forms */
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px;}
+@media (max-width:640px){.form-row{grid-template-columns:1fr;}}
+input,textarea{width:100%;background:var(--onyx-2);border:1px solid var(--line);border-radius:10px;padding:13px 14px;color:var(--paper);font-family:inherit;font-size:14px;}
+textarea{min-height:120px;resize:vertical;}
+label{font-size:12px;color:var(--muted);display:block;margin-bottom:6px;}
+
+/* footer */
+footer{border-top:1px solid var(--line);padding:40px 0;color:var(--muted);font-size:13px;}
+
+/* misc */
+.loading{padding:60px 0;text-align:center;color:var(--muted);}
+.empty{padding:40px 0;text-align:center;color:var(--muted);}
+.config-warning{background:#3a1f1f;border:1px solid #7a3a3a;color:#ffb4b4;padding:16px 20px;border-radius:12px;margin:20px 0;font-size:14px;line-height:1.6;}
+.config-warning code{background:rgba(255,255,255,.08);padding:2px 6px;border-radius:4px;}
+.wa-fab{position:fixed;bottom:22px;right:22px;z-index:60;background:#25D366;color:#fff;width:56px;height:56px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:26px;box-shadow:0 8px 20px rgba(0,0,0,.4);}
+.crumb{font-size:13px;color:var(--muted);margin-bottom:20px;}
+.crumb a{color:var(--gold-1);}
+.subnav{display:flex;flex-wrap:wrap;gap:10px;}
+.subnav a{font-size:13px;font-weight:600;padding:9px 18px;border-radius:999px;border:1px solid var(--line);color:var(--muted);cursor:pointer;}
+.subnav a.active{background:var(--gold-grad);color:var(--onyx);border-color:transparent;}
+.subnav a:hover:not(.active){border-color:var(--gold-1);color:var(--gold-1);}
+</style>
+</head>
+<body>
+
+<nav class="navbar">
+  <div class="wrap">
+    <a href="#/" class="logo">BERR</a>
+    <div class="navlinks" id="navlinks">
+      <a data-route="#/">Ana Sayfa</a>
+      <a data-route="#/arsa">Arsa</a>
+      <a data-route="#/konut">Konut</a>
+      <a data-route="#/proje">Proje</a>
+      <a data-route="#/kurumsal">Kurumsal</a>
+      <a data-route="#/blog">Blog</a>
+      <a data-route="#/icerik-merkezi">İçerik Merkezi</a>
+      <a data-route="#/iletisim" class="cta">İletişim</a>
+    </div>
+    <button class="burger" onclick="document.getElementById('navlinks').classList.toggle('open')">☰</button>
+  </div>
+</nav>
+
+<main id="app"></main>
+
+<footer>
+  <div class="wrap">
+    <p>© <span id="year"></span> BERR Gayrimenkul. Tüm hakları saklıdır.</p>
+  </div>
+</footer>
+
+<a class="wa-fab" id="waFab" href="#" target="_blank" title="WhatsApp">💬</a>
+
+<script>
+/* =====================================================================
+   VERİ KATMANI — Google Sheets (gviz JSON) + Google Drive (v3 API)
+   ===================================================================== */
+const CFG = window.BERR_CONFIG;
+const sheetCache = {};
+const driveFolderCache = {}; // "ARSA" -> {name:id, ...}
+const driveFilesCache = {};  // folderId -> [{id,name}]
+
+function configOk(){
+  return CFG.SHEET_ID && CFG.DRIVE_API_KEY;
+}
+
+async function fetchSheetTab(tabName){
+  if(sheetCache[tabName]) return sheetCache[tabName];
+  const url = `https://docs.google.com/spreadsheets/d/${CFG.SHEET_ID}/gviz/tq?tqx=out:json&sheet=${encodeURIComponent(tabName)}&headers=1`;
+  const res = await fetch(url);
+  const text = await res.text();
+  const jsonStr = text.substring(text.indexOf('{'), text.lastIndexOf('}') + 1);
+  const json = JSON.parse(jsonStr);
+  const cols = json.table.cols.map(c => c.label || c.id);
+  const rows = (json.table.rows || []).map(r => {
+    const obj = {};
+    (r.c || []).forEach((cell, i) => {
+      obj[cols[i]] = cell ? (cell.v !== undefined ? cell.v : null) : null;
+    });
+    return obj;
+  }).filter(row => Object.values(row).some(v => v !== null && v !== ''));
+  sheetCache[tabName] = rows;
+  return rows;
+}
+
+async function getFolderMap(rootFolderId, cacheKey){
+  if(driveFolderCache[cacheKey]) return driveFolderCache[cacheKey];
+  const q = encodeURIComponent(`'${rootFolderId}' in parents and mimeType='application/vnd.google-apps.folder' and trashed=false`);
+  const url = `https://www.googleapis.com/drive/v3/files?q=${q}&key=${CFG.DRIVE_API_KEY}&fields=files(id,name)&pageSize=1000`;
+  const res = await fetch(url);
+  const data = await res.json();
+  const map = {};
+  (data.files || []).forEach(f => map[f.name] = f.id);
+  driveFolderCache[cacheKey] = map;
+  return map;
+}
+
+async function getFolderImages(folderId){
+  if(!folderId) return [];
+  if(driveFilesCache[folderId]) return driveFilesCache[folderId];
+  const q = encodeURIComponent(`'${folderId}' in parents and mimeType contains 'image/' and trashed=false`);
+  const url = `https://www.googleapis.com/drive/v3/files?q=${q}&key=${CFG.DRIVE_API_KEY}&fields=files(id,name)&pageSize=200`;
+  const res = await fetch(url);
+  const data = await res.json();
+  const files = (data.files || []).sort((a,b) => a.name.localeCompare(b.name));
+  driveFilesCache[folderId] = files;
+  return files;
+}
+
+function driveImgUrl(fileId, w=1000){
+  return fileId ? `https://drive.google.com/thumbnail?id=${fileId}&sz=w${w}` : '';
+}
+
+const CAT_ROOT = { ARSA: 'FOLDER_ID_ARSA', KONUT: 'FOLDER_ID_KONUT', PROJE: 'FOLDER_ID_PROJE' };
+
+async function getListingImages(kategori, klasorAdi, kapakAdi){
+  const rootId = CFG[CAT_ROOT[kategori]];
+  if(!rootId) return { cover: '', gallery: [] };
+  const folderMap = await getFolderMap(rootId, kategori);
+  const folderId = folderMap[klasorAdi];
+  if(!folderId) return { cover: '', gallery: [] };
+  const files = await getFolderImages(folderId);
+  if(!files.length) return { cover: '', gallery: [] };
+  let coverFile = kapakAdi ? files.find(f => f.name === kapakAdi) : null;
+  if(!coverFile) coverFile = files[0];
+  return {
+    cover: driveImgUrl(coverFile.id),
+    gallery: files.map(f => driveImgUrl(f.id))
+  };
+}
+
+/* =====================================================================
+   ROUTER
+   ===================================================================== */
+const app = document.getElementById('app');
+document.getElementById('year').textContent = new Date().getFullYear();
+
+const routes = {
+  '#/': renderHome,
+  '#/arsa': () => renderListingGrid('ARSA', 'Arsa Portföyü'),
+  '#/konut': () => renderListingGrid('KONUT', 'Konut Portföyü'),
+  '#/proje': () => renderListingGrid('PROJE', 'Proje Portföyü'),
+  '#/kurumsal': () => renderKurumsal('biz-kimiz'),
+  '#/blog': renderBlogList,
+  '#/iletisim': renderIletisim,
+  '#/icerik-merkezi': renderIcerikMerkezi,
+};
+
+const KURUMSAL_TABS = [
+  { slug: 'biz-kimiz', label: 'Biz Kimiz' },
+  { slug: 'ofislerimiz', label: 'Ofislerimiz' },
+  { slug: 'referanslarimiz', label: 'Referanslarımız' },
+  { slug: 'odullerimiz', label: 'Ödüllerimiz' },
+  { slug: 'sosyal-sorumluluk', label: 'Sosyal Sorumluluk' },
+  { slug: 'basinda-biz', label: 'Basında Biz' },
+];
+
+async function router(){
+  window.scrollTo(0,0);
+  document.querySelectorAll('.navlinks a[data-route]').forEach(a=>{
+    a.classList.toggle('active', a.dataset.route === (location.hash.split('/').slice(0,2).join('/') || '#/'));
+  });
+  document.getElementById('navlinks').classList.remove('open');
+
+  if(!configOk()){
+    app.innerHTML = `<div class="wrap section"><div class="config-warning">
+      <strong>Kurulum tamamlanmadı.</strong> Bu dosyanın en üstündeki <code>window.BERR_CONFIG</code>
+      bloğuna Google Sheet ID ve Drive API Key gibi bilgileri girmen gerekiyor.
+      Detaylar için <code>KURULUM-TEK-SAYFA.md</code> dosyasına bak.
+    </div></div>`;
+    return;
+  }
+
+  const hash = location.hash || '#/';
+  const parts = hash.split('/').filter(Boolean); // ["#", "arsa", "slug"]
+
+  try{
+    if(parts.length >= 3 && ['#arsa','#konut','#proje'].includes('#'+parts[1])){
+      const kat = parts[1].toUpperCase();
+      await renderListingDetail(kat, parts[2]);
+      return;
+    }
+    if(parts[1] === 'blog' && parts.length >= 3){
+      await renderBlogDetail(parts[2]);
+      return;
+    }
+    if(parts[1] === 'kurumsal' && parts[2] === 'sosyal-sorumluluk' && parts.length >= 4){
+      await renderSosyalSorumlulukDetail(parts[3]);
+      return;
+    }
+    if(parts[1] === 'kurumsal' && parts.length >= 3){
+      await renderKurumsal(parts[2]);
+      return;
+    }
+    const base = '#/' + (parts[1] || '');
+    const fn = routes[base] || renderHome;
+    await fn();
+  }catch(err){
+    console.error(err);
+    app.innerHTML = `<div class="wrap section"><div class="config-warning">
+      Veri yüklenirken bir hata oluştu: ${err.message}. Konsolu (F12) kontrol et —
+      genelde Sheet paylaşım izni veya Drive API key kısıtlaması sebebiyledir.
+    </div></div>`;
+  }
+}
+window.addEventListener('hashchange', router);
+document.addEventListener('click', e=>{
+  const a = e.target.closest('[data-route]');
+  if(a){ location.hash = a.dataset.route; }
+});
+
+/* =====================================================================
+   RENDER — HOME
+   ===================================================================== */
+async function renderHome(){
+  app.innerHTML = `<div class="loading">Yükleniyor…</div>`;
+  const [banners, kategoriler, portfoyler] = await Promise.all([
+    fetchSheetTab('BANNER'), fetchSheetTab('KATEGORILER'), fetchSheetTab('PORTFOYLER')
+  ]);
+
+  const banner = banners.filter(b=>b['Aktif']==='EVET').sort((a,b)=>a['Sıra']-b['Sıra'])[0];
+  let heroImg = '';
+  if(banner){
+    const map = await getFolderMap(CFG.FOLDER_ID_BANNER, 'BANNER');
+    const fileId = map[banner['Görsel']];
+    heroImg = fileId ? driveImgUrl(fileId, 1600) : '';
+  }
+
+  const aktifKategoriler = kategoriler.filter(k=>k['Aktif']==='EVET').sort((a,b)=>a['Sıra']-b['Sıra']);
+  const oneCikanlar = portfoyler.filter(p=>p['Yayında']==='EVET' && p['Durum']==='AKTIF' && p['Öne Çıkan']==='EVET').slice(0,6);
+
+  app.innerHTML = `
+    <section class="hero">
+      <div class="bg">${heroImg?`<img src="${heroImg}" alt="">`:''}</div>
+      <div class="wrap">
+        <div class="hero-inner">
+          <div class="eyebrow">${banner?.['textPosition']?'':''}BERR Gayrimenkul</div>
+          <h1 class="disp">${banner?.['Başlık'] || 'Önce arsam, sonra evim'}</h1>
+          <p class="muted" style="font-size:17px;margin-bottom:26px;">${banner?.['Açıklama'] || 'Ege kıyısında villa imarlı arsalar'}</p>
+          <a class="btn" data-route="${banner?.['buttonUrl']?'#/'+banner['buttonUrl'].replace(/^\//,''):'#/arsa'}">${banner?.['buttonText'] || 'Arsaları İncele'} →</a>
+        </div>
+      </div>
+    </section>
+
+    <section class="section wrap">
+      <div class="section-h"><h2 class="disp">Kategoriler</h2></div>
+      <div class="grid cols-4">
+        ${aktifKategoriler.map(k=>`
+          <a class="kat-tile" data-route="#/arsa">
+            <img src="" alt="">
+            <div class="lbl">${k['Başlık']}</div>
+          </a>`).join('')}
+      </div>
+    </section>
+
+    <section class="section wrap" id="oneCikanWrap">
+      <div class="section-h"><h2 class="disp">Öne Çıkan İlanlar</h2><a data-route="#/arsa">Tümünü Gör →</a></div>
+      <div class="grid cols-3" id="oneCikanGrid"><div class="loading">Yükleniyor…</div></div>
+    </section>
+  `;
+
+  const grid = document.getElementById('oneCikanGrid');
+  if(!oneCikanlar.length){ grid.innerHTML = `<div class="empty">Henüz öne çıkan ilan yok.</div>`; return; }
+  grid.innerHTML = '';
+  for(const p of oneCikanlar){
+    grid.insertAdjacentHTML('beforeend', listingCardSkeleton(p));
+  }
+  oneCikanlar.forEach(async p=>{
+    const {cover} = await getListingImages(p['Kategori'], p['Klasör'], p['Kapak Görsel']);
+    const el = document.querySelector(`[data-ilan="${p['İlan No']}"] img`);
+    if(el && cover) el.src = cover;
+  });
+}
+
+/* =====================================================================
+   RENDER — LISTING GRID (arsa / konut / proje)
+   ===================================================================== */
+function listingCardSkeleton(p){
+  const kat = (p['Kategori']||'').toLowerCase();
+  const fiyat = p['İndirimli Fiyat'] || p['Fiyat'];
+  const fiyatStr = fiyat ? Number(fiyat).toLocaleString('tr-TR') + ' ' + (p['Para Birimi']||'TRY') : '';
+  return `
+    <div class="card" data-route="#/${kat}/${p['Slug']}" data-ilan="${p['İlan No']}">
+      <div class="thumb">
+        ${p['Öne Çıkan']==='EVET'?'<div class="badge">Öne Çıkan</div>':''}
+        <img src="" alt="${p['Başlık']}" loading="lazy">
+      </div>
+      <div class="body">
+        <h3>${p['Başlık']}</h3>
+        <div class="meta">${[p['İlçe'],p['İl']].filter(Boolean).join(', ')}${p['Alan']?' · '+p['Alan']+' m²':''}</div>
+        ${fiyatStr?`<div class="price">${fiyatStr}</div>`:''}
+      </div>
+    </div>`;
+}
+
+async function renderListingGrid(kategori, baslik){
+  app.innerHTML = `<div class="wrap section"><div class="loading">Yükleniyor…</div></div>`;
+  const portfoyler = await fetchSheetTab('PORTFOYLER');
+  const list = portfoyler.filter(p=>p['Kategori']===kategori && p['Yayında']==='EVET' && p['Durum']==='AKTIF')
+    .sort((a,b)=> (a['Sıra']||0)-(b['Sıra']||0));
+
+  app.innerHTML = `
+    <section class="section wrap">
+      <div class="section-h"><h2 class="disp">${baslik}</h2><span class="muted">${list.length} ilan</span></div>
+      <div class="grid cols-3" id="listGrid"></div>
+    </section>`;
+
+  const grid = document.getElementById('listGrid');
+  if(!list.length){ grid.innerHTML = `<div class="empty">Bu kategoride yayınlanan ilan bulunmuyor.</div>`; return; }
+  grid.innerHTML = list.map(listingCardSkeleton).join('');
+  list.forEach(async p=>{
+    const {cover} = await getListingImages(p['Kategori'], p['Klasör'], p['Kapak Görsel']);
+    const el = document.querySelector(`[data-ilan="${p['İlan No']}"] img`);
+    if(el && cover) el.src = cover;
+  });
+}
+
+/* =====================================================================
+   RENDER — LISTING DETAIL
+   ===================================================================== */
+const DETAY_TAB = { ARSA: 'ARSA_DETAY', KONUT: 'KONUT_DETAY', PROJE: 'PROJE_DETAY' };
+const DETAY_LABELS = {
+  landType:'Arsa Tipi', deedStatus:'Tapu Durumu', zoningStatus:'İmar Durumu', zoningType:'İmar Tipi',
+  island:'Ada', parcel:'Parsel', sheet:'Pafta', landArea:'Alan (m²)', emsal:'Emsal', taks:'Taks', kaks:'Kaks',
+  gabari:'Gabari', floorPermission:'Kat İzni', villaCount:'Villa Sayısı', residenceCount:'Konut Sayısı',
+  roadFrontage:'Yol Cephesi', frontage:'Cephe', view:'Manzara', terrain:'Arazi Yapısı', seaDistance:'Denize Mesafe (m)',
+  centerDistance:'Merkeze Mesafe (m)', airportDistance:'Havalimanına Mesafe (m)', mainRoadDistance:'Ana Yola Mesafe (m)',
+  electricity:'Elektrik', water:'Su', sewer:'Kanalizasyon', naturalGas:'Doğalgaz', roadCondition:'Yol Durumu',
+  oliveTrees:'Zeytin Ağacı', agriculturalFeatures:'Tarımsal Özellikler', landDescription:'Açıklama',
+  residenceType:'Konut Tipi', rooms:'Oda Sayısı', livingRooms:'Salon', netArea:'Net Alan (m²)', grossArea:'Brüt Alan (m²)',
+  buildingAge:'Bina Yaşı', floor:'Bulunduğu Kat', totalFloors:'Toplam Kat', heating:'Isıtma', bathrooms:'Banyo',
+  toilets:'WC', balcony:'Balkon', terrace:'Teras', elevator:'Asansör', parking:'Otopark', site:'Site İçinde',
+  dues:'Aidat', furnished:'Eşyalı', facade:'Cephe', mortgageEligible:'Krediye Uygun', occupancyStatus:'Kullanım Durumu',
+  residenceDescription:'Açıklama',
+  projectName:'Proje Adı', projectType:'Proje Tipi', completionStatus:'Tamamlanma Durumu', deliveryDate:'Teslim Tarihi',
+  totalUnits:'Toplam Ünite', availableUnits:'Satılık Ünite', projectDescription:'Açıklama'
+};
+
+async function renderListingDetail(kategori, slug){
+  app.innerHTML = `<div class="wrap section"><div class="loading">Yükleniyor…</div></div>`;
+  const [portfoyler, detaylar] = await Promise.all([
+    fetchSheetTab('PORTFOYLER'), fetchSheetTab(DETAY_TAB[kategori])
+  ]);
+  const p = portfoyler.find(x=>x['Slug']===slug && x['Kategori']===kategori);
+  if(!p){ app.innerHTML = `<div class="wrap section"><div class="empty">İlan bulunamadı.</div></div>`; return; }
+  const d = detaylar.find(x=>x['İlan No']===p['İlan No']) || {};
+  const {gallery} = await getListingImages(kategori, p['Klasör'], p['Kapak Görsel']);
+  const fiyat = p['İndirimli Fiyat'] || p['Fiyat'];
+  const fiyatStr = fiyat ? Number(fiyat).toLocaleString('tr-TR') + ' ' + (p['Para Birimi']||'TRY') : '';
+  const descKey = kategori==='ARSA'?'landDescription':kategori==='KONUT'?'residenceDescription':'projectDescription';
+
+  const specRows = Object.keys(d).filter(k=>k!=='İlan No' && k!==descKey && d[k]!==null && d[k]!=='')
+    .map(k=>`<tr><td>${DETAY_LABELS[k]||k}</td><td>${d[k]}</td></tr>`).join('');
+
+  const g = gallery.length ? gallery : ['','',''];
+  app.invisible = null;
+  app.innerHTML = `
+    <div class="wrap section">
+      <div class="crumb"><a data-route="#/${kategori.toLowerCase()}">${kategori==='ARSA'?'Arsa':kategori==='KONUT'?'Konut':'Proje'}</a> / ${p['Başlık']}</div>
+
+      <div class="detail-gallery">
+        <div>${g[0]?`<img src="${g[0]}" alt="">`:''}</div>
+        <div class="side">${g.slice(1,3).map(u=>u?`<img src="${u}" alt="">`:'').join('')}</div>
+      </div>
+
+      <h1 class="disp" style="font-size:34px;margin-bottom:10px;">${p['Başlık']}</h1>
+      <p class="muted">${[p['Mahalle'],p['İlçe'],p['İl']].filter(Boolean).join(', ')}</p>
+      ${fiyatStr?`<div class="price" style="font-size:28px;margin:16px 0;">${fiyatStr}</div>`:''}
+
+      ${d[descKey]?`<p style="margin:20px 0;line-height:1.7;">${d[descKey]}</p>`:''}
+
+      <table class="spec-table">
+        <tr><td>Alan</td><td>${p['Alan']?p['Alan']+' m²':'-'}</td></tr>
+        ${specRows}
+      </table>
+
+      <div style="display:flex;gap:12px;flex-wrap:wrap;margin-top:20px;">
+        ${p['whatsappEnabled']==='EVET' && p['phone'] ? `<a class="btn" href="https://wa.me/${p['phone'].replace(/[^0-9]/g,'')}" target="_blank">WhatsApp ile Sor</a>`:''}
+        <a class="btn btn-outline" data-route="#/iletisim">Bilgi Talep Et</a>
+      </div>
+    </div>`;
+}
+
+/* =====================================================================
+   RENDER — KURUMSAL
+   ===================================================================== */
+function kurumsalSubnav(active){
+  return `<div class="subnav" style="margin-bottom:32px;">
+    ${KURUMSAL_TABS.map(t=>`<a data-route="#/kurumsal/${t.slug}" class="${t.slug===active?'active':''}">${t.label}</a>`).join('')}
+  </div>`;
+}
+
+async function renderKurumsal(tab){
+  app.innerHTML = `<div class="wrap section"><div class="loading">Yükleniyor…</div></div>`;
+  const html = `<div class="wrap section"><h1 class="disp" style="font-size:38px;margin-bottom:8px;">Kurumsal</h1>${kurumsalSubnav(tab)}<div id="kurumsalBody"><div class="loading">Yükleniyor…</div></div></div>`;
+  app.innerHTML = html;
+  const body = document.getElementById('kurumsalBody');
+
+  if(tab === 'ofislerimiz'){
+    const ofisler = (await fetchSheetTab('OFISLER')).filter(o=>o['Aktif']==='EVET').sort((a,b)=>(a['Sıra']||0)-(b['Sıra']||0));
+    body.innerHTML = ofisler.length ? `<div class="grid cols-3">${ofisler.map(o=>`
+      <div class="card" style="cursor:default;">
+        <div class="body">
+          <h3>${o['Ofis Adı']}</h3>
+          <p class="muted" style="font-size:13.5px;line-height:1.6;margin-top:8px;">${o['Adres']||''}</p>
+          <p class="muted" style="font-size:13.5px;margin-top:8px;">${o['Telefon']||''}<br>${o['E-posta']||''}</p>
+          <p class="muted" style="font-size:13px;margin-top:6px;">${o['Çalışma Saatleri']||''}</p>
+        </div>
+      </div>`).join('')}</div>` : '<div class="empty">Henüz ofis eklenmedi.</div>';
+    return;
+  }
+
+  if(tab === 'referanslarimiz'){
+    const rows = (await fetchSheetTab('REFERANSLAR')).filter(r=>r['Aktif']==='EVET').sort((a,b)=>(a['Sıra']||0)-(b['Sıra']||0));
+    body.innerHTML = rows.length ? `<div class="grid cols-4">${rows.map(r=>`
+      <div class="card" style="cursor:default;"><div class="body"><h3 style="font-size:15px;">${r['Başlık']}</h3></div></div>`).join('')}</div>`
+      : '<div class="empty">Henüz referans eklenmedi.</div>';
+    return;
+  }
+
+  if(tab === 'odullerimiz'){
+    const rows = (await fetchSheetTab('ODULLER')).filter(r=>r['Aktif']==='EVET').sort((a,b)=>(a['Sıra']||0)-(b['Sıra']||0));
+    body.innerHTML = rows.length ? `<div class="grid cols-3">${rows.map(r=>`
+      <div class="card" style="cursor:default;"><div class="body">
+        <h3>${r['Başlık']}</h3>
+        <div class="meta">${r['Tarih']||''}</div>
+        ${r['Açıklama']?`<p class="muted" style="margin-top:8px;font-size:13.5px;">${r['Açıklama']}</p>`:''}
+      </div></div>`).join('')}</div>`
+      : '<div class="empty">Henüz ödül eklenmedi.</div>';
+    return;
+  }
+
+  if(tab === 'sosyal-sorumluluk'){
+    const rows = (await fetchSheetTab('SOSYAL_SORUMLULUK')).filter(r=>r['Aktif']==='EVET').sort((a,b)=>(a['Sıra']||0)-(b['Sıra']||0));
+    body.innerHTML = rows.length ? `<div class="grid cols-3">${rows.map(r=>`
+      <div class="card" data-route="#/kurumsal/sosyal-sorumluluk/${r['Slug']}">
+        <div class="thumb"><img src="" alt=""></div>
+        <div class="body"><h3>${r['Başlık']}</h3><div class="meta">${r['Tarih']||''}</div>
+        ${r['Kısa Açıklama']?`<p class="muted" style="margin-top:8px;font-size:13.5px;">${r['Kısa Açıklama']}</p>`:''}</div>
+      </div>`).join('')}</div>`
+      : '<div class="empty">Henüz sosyal sorumluluk projesi eklenmedi.</div>';
+    return;
+  }
+
+  if(tab === 'basinda-biz'){
+    const rows = (await fetchSheetTab('BASINDA_BIZ')).filter(r=>r['Aktif']==='EVET').sort((a,b)=>(a['Sıra']||0)-(b['Sıra']||0));
+    body.innerHTML = rows.length ? rows.map(r=>`
+      <div style="display:flex;justify-content:space-between;gap:16px;padding:20px 0;border-bottom:1px solid var(--line);">
+        <h3 style="font-size:16px;">${r['Link'] ? `<a href="${r['Link']}" target="_blank">${r['Başlık']}</a>` : r['Başlık']}</h3>
+        <span class="mono" style="font-size:12px;color:var(--gold-1);white-space:nowrap;">${[r['Kaynak'],r['Tarih']].filter(Boolean).join(' · ')}</span>
+      </div>`).join('') : '<div class="empty">Henüz basın haberi eklenmedi.</div>';
+    return;
+  }
+
+  // default: biz-kimiz
+  const rows = (await fetchSheetTab('KURUMSAL')).filter(r=>r['Aktif']==='EVET').sort((a,b)=>(a['Sıra']||0)-(b['Sıra']||0));
+  body.innerHTML = rows.length ? rows.map(r=>`
+    <div style="margin-bottom:40px;">
+      <h2 class="disp" style="font-size:24px;margin-bottom:12px;">${r['Başlık']}</h2>
+      <p class="muted" style="line-height:1.8;">${r['İçerik']||''}</p>
+    </div>`).join('') : '<div class="empty">Kurumsal içerik henüz eklenmedi.</div>';
+}
+
+async function renderSosyalSorumlulukDetail(slug){
+  app.innerHTML = `<div class="wrap section"><div class="loading">Yükleniyor…</div></div>`;
+  const rows = await fetchSheetTab('SOSYAL_SORUMLULUK');
+  const r = rows.find(x=>x['Slug']===slug);
+  if(!r){ app.innerHTML = `<div class="wrap section"><div class="empty">İçerik bulunamadı.</div></div>`; return; }
+  app.innerHTML = `<div class="wrap section" style="max-width:760px;">
+    <div class="crumb"><a data-route="#/kurumsal/sosyal-sorumluluk">Sosyal Sorumluluk</a> / ${r['Başlık']}</div>
+    <h1 class="disp" style="font-size:34px;margin-bottom:10px;">${r['Başlık']}</h1>
+    <p class="muted" style="margin-bottom:24px;">${r['Tarih']||''}</p>
+    <div style="line-height:1.8;white-space:pre-wrap;">${r['İçerik']||r['Kısa Açıklama']||''}</div>
+  </div>`;
+}
+
+/* =====================================================================
+   RENDER — İÇERİK MERKEZİ (iç mimari detaylar + videolar)
+   ===================================================================== */
+async function renderIcerikMerkezi(){
+  app.innerHTML = `<div class="wrap section"><div class="loading">Yükleniyor…</div></div>`;
+  const [detaylar, videolar] = await Promise.all([
+    fetchSheetTab('IC_MIMARI_DETAY'), fetchSheetTab('ICERIK_VIDEOLARI')
+  ]);
+  const dRows = detaylar.filter(r=>r['Aktif']==='EVET').sort((a,b)=>(a['Sıra']||0)-(b['Sıra']||0));
+  const vRows = videolar.filter(r=>r['Aktif']==='EVET').sort((a,b)=>(a['Sıra']||0)-(b['Sıra']||0));
+
+  app.innerHTML = `<div class="wrap section">
+    <h1 class="disp" style="font-size:38px;margin-bottom:32px;">İçerik Merkezi</h1>
+
+    <div class="section-h"><h2 class="disp" style="font-size:22px;">İç Mimari Detaylar</h2></div>
+    <div class="grid cols-4" style="margin-bottom:56px;">
+      ${dRows.length ? dRows.map(r=>`
+        <div class="card" style="cursor:default;">
+          <div class="thumb"><img src="" alt=""></div>
+          <div class="body"><h3 style="font-size:14px;">${r['Başlık']}</h3>
+          ${r['Kısa Açıklama']?`<p class="muted" style="margin-top:6px;font-size:12px;">${r['Kısa Açıklama']}</p>`:''}</div>
+        </div>`).join('') : '<div class="empty">Henüz içerik eklenmedi.</div>'}
+    </div>
+
+    <div class="section-h"><h2 class="disp" style="font-size:22px;">Videolar</h2></div>
+    <div class="grid cols-3">
+      ${vRows.length ? vRows.map(r=>`
+        <a class="card" href="${r['YouTube Linki']}" target="_blank" style="cursor:pointer;">
+          <div class="thumb" style="display:flex;align-items:center;justify-content:center;font-size:32px;">▶</div>
+          <div class="body"><h3 style="font-size:14px;">${r['Başlık']}</h3>
+          ${r['Kısa Açıklama']?`<p class="muted" style="margin-top:6px;font-size:12px;">${r['Kısa Açıklama']}</p>`:''}</div>
+        </a>`).join('') : '<div class="empty">Henüz video eklenmedi.</div>'}
+    </div>
+  </div>`;
+}
+
+/* =====================================================================
+   RENDER — BLOG
+   ===================================================================== */
+async function renderBlogList(){
+  app.innerHTML = `<div class="wrap section"><div class="loading">Yükleniyor…</div></div>`;
+  const rows = (await fetchSheetTab('BLOG')).filter(r=>r['Aktif']==='EVET').sort((a,b)=>new Date(b['Tarih'])-new Date(a['Tarih']));
+  app.innerHTML = `<div class="wrap section">
+    <div class="section-h"><h2 class="disp">Blog</h2></div>
+    <div class="grid cols-3">
+      ${rows.length ? rows.map(r=>`
+        <div class="card" data-route="#/blog/${r['Slug']}">
+          <div class="thumb"><img src="" alt=""></div>
+          <div class="body"><h3>${r['Başlık']}</h3><div class="meta">${r['Tarih']||''}</div>
+          <p class="muted" style="margin-top:8px;font-size:14px;">${r['Kısa Açıklama']||''}</p></div>
+        </div>`).join('') : '<div class="empty">Henüz blog yazısı yok.</div>'}
+    </div>
+  </div>`;
+}
+
+async function renderBlogDetail(slug){
+  app.innerHTML = `<div class="wrap section"><div class="loading">Yükleniyor…</div></div>`;
+  const rows = await fetchSheetTab('BLOG');
+  const r = rows.find(x=>x['Slug']===slug);
+  if(!r){ app.innerHTML = `<div class="wrap section"><div class="empty">Yazı bulunamadı.</div></div>`; return; }
+  app.innerHTML = `<div class="wrap section" style="max-width:760px;">
+    <div class="crumb"><a data-route="#/blog">Blog</a> / ${r['Başlık']}</div>
+    <h1 class="disp" style="font-size:34px;margin-bottom:10px;">${r['Başlık']}</h1>
+    <p class="muted" style="margin-bottom:24px;">${r['Tarih']||''}</p>
+    <div style="line-height:1.8;white-space:pre-wrap;">${r['İçerik']||r['Kısa Açıklama']||''}</div>
+  </div>`;
+}
+
+/* =====================================================================
+   RENDER — İLETİŞİM (+ TALEPLER formu -> Apps Script)
+   ===================================================================== */
+async function renderIletisim(){
+  app.innerHTML = `<div class="wrap section"><div class="loading">Yükleniyor…</div></div>`;
+  const ofisler = (await fetchSheetTab('OFISLER')).filter(o=>o['Aktif']==='EVET');
+
+  app.innerHTML = `<div class="wrap section">
+    <h1 class="disp" style="font-size:38px;margin-bottom:8px;">İletişim</h1>
+    <p class="muted" style="margin-bottom:36px;">Bize ulaşın, en kısa sürede dönüş yapalım.</p>
+
+    <div class="grid" style="grid-template-columns:1fr 1fr;gap:48px;align-items:start;">
+      <form id="talepForm">
+        <div class="form-row">
+          <div><label>Ad Soyad</label><input name="name" required></div>
+          <div><label>Telefon</label><input name="phone" required></div>
+        </div>
+        <div class="form-row">
+          <div><label>E-posta</label><input name="email" type="email"></div>
+          <div><label>İlgilendiğiniz İlan No (varsa)</label><input name="listingNo"></div>
+        </div>
+        <label>Mesajınız</label>
+        <textarea name="message" style="margin-bottom:16px;"></textarea>
+        <button type="submit" class="btn">Gönder</button>
+        <p id="formMsg" class="muted" style="margin-top:12px;font-size:13px;"></p>
+      </form>
+
+      <div>
+        ${ofisler.map(o=>`
+          <div style="margin-bottom:24px;padding-bottom:24px;border-bottom:1px solid var(--line);">
+            <h3 style="margin-bottom:6px;">${o['Ofis Adı']}</h3>
+            <p class="muted" style="font-size:14px;line-height:1.6;">${o['Adres']||''}</p>
+            <p class="muted" style="font-size:14px;">${o['Telefon']||''} · ${o['E-posta']||''}</p>
+            <p class="muted" style="font-size:13px;">${o['Çalışma Saatleri']||''}</p>
+          </div>`).join('') || '<div class="empty">Ofis bilgisi eklenmedi.</div>'}
+      </div>
+    </div>
+  </div>`;
+
+  document.getElementById('talepForm').addEventListener('submit', async e=>{
+    e.preventDefault();
+    const msg = document.getElementById('formMsg');
+    if(!CFG.APPS_SCRIPT_URL){
+      msg.textContent = 'Form gönderimi henüz aktif değil (APPS_SCRIPT_URL boş).';
+      return;
+    }
+    const fd = new FormData(e.target);
+    const payload = Object.fromEntries(fd.entries());
+    payload.source = 'website';
+    payload.pageUrl = location.href;
+    msg.textContent = 'Gönderiliyor…';
+    try{
+      await fetch(CFG.APPS_SCRIPT_URL, {
+        method: 'POST',
+        mode: 'no-cors', // Apps Script CORS kısıtı için — yanıt okunamaz, gönderim yine de gerçekleşir
+        headers: { 'Content-Type': 'text/plain' },
+        body: JSON.stringify(payload)
+      });
+      msg.textContent = 'Teşekkürler, talebiniz alındı. En kısa sürede dönüş yapacağız.';
+      e.target.reset();
+    }catch(err){
+      msg.textContent = 'Bir hata oluştu, lütfen tekrar deneyin.';
+    }
+  });
+}
+
+/* =====================================================================
+   WHATSAPP FAB
+   ===================================================================== */
+document.getElementById('waFab').href = `https://wa.me/${(CFG.WHATSAPP_PHONE||'').replace(/[^0-9]/g,'')}`;
+
+router();
+</script>
+</body>
+</html>
