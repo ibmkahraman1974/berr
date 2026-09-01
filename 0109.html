@@ -718,24 +718,41 @@
     background:radial-gradient(1200px 500px at 15% -10%, #f1e2b8 0%, transparent 60%),
       linear-gradient(160deg, var(--bg-0) 0%, var(--bg-1) 45%, var(--bg-2) 100%);
   }
-  *{ -webkit-print-color-adjust:exact; print-color-adjust:exact; }
-  @page{ margin:20mm 15mm; }
+  *{ -webkit-print-color-adjust:exact; print-color-adjust:exact; color-adjust:exact; }
+  /* Kenar boşluğu SIFIR: gold arka plan sayfanın tam kenarına kadar
+     kaplasın (tam kanama/bleed). İç boşluk artık içerik bölümlerinin
+     kendi padding'inden geliyor — böylece kesim (trim) sonrasında
+     kenarda beyaz şerit kalmaz. */
+  @page{ margin:0; }
   .catalog-print-frame,.catalog-print-footer{display:block}
 }
-/* Her fiziksel sayfada tekrar eden altın "kitap baskısı" çerçevesi ve
-   alt-orta site adresi — position:fixed sayesinde her sayfada yeniden çizilir. */
-.catalog-print-frame{display:none;position:fixed;top:7mm;left:7mm;right:7mm;bottom:7mm;
-  border:2px solid var(--gold-2);pointer-events:none;z-index:80}
-.catalog-print-frame::before{content:"";position:absolute;inset:5px;border:1px solid rgba(138,106,44,.55)}
-.catalog-print-footer{display:none;position:fixed;bottom:2.5mm;left:0;right:0;text-align:center;
+/* Her fiziksel sayfada tekrar eden, kesim sonrası görünür kalacak kalın
+   altın "kitap baskısı" çift çerçevesi ve alt-orta site adresi —
+   position:fixed sayesinde her sayfada yeniden çizilir. Çerçeve, gerçek
+   sayfa kenarından belli bir payla (9mm) içeride durur; arka plandaki
+   gold renk sayfanın tam kenarına kadar zaten devam ettiği için çerçeve
+   asla "boşluğa" çıkmaz. */
+.catalog-print-frame{display:none;position:fixed;top:9mm;left:9mm;right:9mm;bottom:9mm;
+  border:3px solid var(--gold-2);pointer-events:none;z-index:80}
+.catalog-print-frame::before{content:"";position:absolute;inset:6px;border:1.5px solid rgba(138,106,44,.6)}
+/* Kitap plakası köşe süslemesi: tek bir SVG kıvrım, 4 köşeye ayna/döndürme ile yerleştirilir */
+.catalog-corner{position:absolute;width:30px;height:30px;background:no-repeat center/contain;
+  background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='36' height='36' viewBox='0 0 36 36'><path d='M2 16 V2 H16' fill='none' stroke='%23a9782a' stroke-width='1.4'/><path d='M2 2 Q13 2 13 13' fill='none' stroke='%23a9782a' stroke-width='1'/><circle cx='5.5' cy='5.5' r='1.6' fill='%23a9782a'/></svg>")}
+.catalog-corner.tl{top:-3px;left:-3px}
+.catalog-corner.tr{top:-3px;right:-3px;transform:scaleX(-1)}
+.catalog-corner.bl{bottom:-3px;left:-3px;transform:scaleY(-1)}
+.catalog-corner.br{bottom:-3px;right:-3px;transform:scale(-1,-1)}
+.catalog-print-footer{display:none;position:fixed;bottom:4mm;left:0;right:0;text-align:center;
   font-family:'Montserrat';font-size:9px;letter-spacing:2.5px;color:var(--gold-3);z-index:80}
 
 /* Kapak sayfası */
 .catalog-cover-page{position:relative;min-height:96vh;display:flex;align-items:center;justify-content:center;
-  text-align:center;page-break-after:always;overflow:hidden}
+  text-align:center;page-break-after:always;overflow:hidden;padding:24mm 22mm}
 .catalog-cover-wm{position:absolute;inset:-4%;background-size:cover;background-position:center 25%;
-  opacity:.17;filter:grayscale(20%) sepia(10%)}
-.catalog-cover-inner{position:relative;z-index:1;padding:40px;max-width:560px}
+  opacity:.17;filter:grayscale(100%) contrast(1.05) brightness(1.1)}
+.catalog-cover-wm::after{content:"";position:absolute;inset:0;background:var(--gold-2);
+  mix-blend-mode:color}
+.catalog-cover-inner{position:relative;z-index:1;max-width:560px}
 .catalog-cover-inner img{width:104px;height:104px;object-fit:contain;margin-bottom:22px}
 .catalog-cover-inner .catalog-eyebrow{font-family:'Montserrat';font-size:12px;letter-spacing:5px;
   text-transform:uppercase;color:var(--gold-2);margin-bottom:22px}
@@ -744,11 +761,39 @@
 .catalog-cover-inner .catalog-date{font-family:'Montserrat';font-size:10.5px;letter-spacing:1px;
   color:var(--text-muted);margin-top:22px}
 
+/* İçindekiler sayfası */
+.catalog-toc{position:relative;min-height:96vh;page-break-after:always;padding:26mm 26mm;
+  display:flex;flex-direction:column;justify-content:center}
+.catalog-toc h2{font-family:'Cormorant Garamond',serif;font-style:italic;font-weight:600;font-size:26px;
+  color:var(--gold-2);text-align:center;margin-bottom:6mm}
+.catalog-toc-list{list-style:none}
+.catalog-toc-list li{display:flex;align-items:baseline;gap:8px;padding:6px 0;
+  border-bottom:1px dotted rgba(138,106,44,.35);font-family:'Montserrat';font-size:12.5px;color:var(--cream)}
+.catalog-toc-list .toc-name{white-space:nowrap}
+.catalog-toc-list .toc-dots{flex:1;border-bottom:1px dotted rgba(138,106,44,.35);margin-bottom:3px}
+.catalog-toc-list .toc-count{color:var(--gold-3);font-size:11px;letter-spacing:1px;white-space:nowrap}
+
+/* Arka kapak (kapanış) sayfası */
+.catalog-back-page{position:relative;min-height:96vh;display:flex;align-items:center;justify-content:center;
+  text-align:center;page-break-before:always;overflow:hidden;padding:24mm 22mm}
+.catalog-back-inner{position:relative;z-index:1;max-width:520px}
+.catalog-back-inner img{width:86px;height:86px;object-fit:contain;margin-bottom:20px}
+.catalog-back-inner h2{font-family:'Cormorant Garamond',serif;font-style:italic;font-weight:600;
+  font-size:27px;color:var(--gold-2);margin-bottom:14px}
+.catalog-back-inner .catalog-back-thanks{font-family:'Cormorant Garamond',serif;font-style:italic;
+  font-size:14.5px;color:var(--text-soft);line-height:1.85;margin-bottom:26px}
+.catalog-back-inner .catalog-back-contact{font-family:'Montserrat';font-size:11px;color:var(--text-soft);
+  line-height:2;letter-spacing:.3px}
+.catalog-back-inner .catalog-back-site{font-family:'Montserrat';font-size:11px;letter-spacing:3px;
+  text-transform:uppercase;color:var(--gold-2);margin-top:20px}
+
 /* Kategori bölüm-açılış sayfası (fligranlı) */
 .catalog-chapter{position:relative;min-height:92vh;display:flex;align-items:center;justify-content:center;
-  text-align:center;page-break-before:always;page-break-after:always;overflow:hidden;padding:40px}
+  text-align:center;page-break-before:always;page-break-after:always;overflow:hidden;padding:24mm 22mm}
 .catalog-chapter-wm{position:absolute;inset:-4%;background-size:cover;background-position:center;
-  opacity:.15;filter:grayscale(25%) sepia(8%)}
+  opacity:.15;filter:grayscale(100%) contrast(1.05) brightness(1.1)}
+.catalog-chapter-wm::after{content:"";position:absolute;inset:0;background:var(--gold-2);
+  mix-blend-mode:color}
 .catalog-chapter-inner{position:relative;z-index:1;max-width:600px}
 .catalog-chapter-inner h2{font-family:'Cormorant Garamond',serif;font-weight:600;font-size:30px;
   color:var(--gold-2);margin-bottom:16px}
@@ -758,7 +803,7 @@
   letter-spacing:2.5px;text-transform:uppercase;color:var(--gold-3);margin-top:16px}
 
 /* Kategori içi eser listesi: her sayfada 6 görsel (3x2), altında tam başlık + açıklama */
-.catalog-works{page-break-after:always;page-break-inside:avoid;padding:10mm 0}
+.catalog-works{page-break-after:always;page-break-inside:avoid;padding:22mm 20mm}
 .catalog-work-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:22px 18px;align-items:start}
 .catalog-work{break-inside:avoid;display:flex;flex-direction:column}
 .catalog-work .catalog-work-img{width:100%;aspect-ratio:1/1;object-fit:cover;display:block;
@@ -4308,8 +4353,19 @@ document.addEventListener('dragstart', e=>{
     const today = new Date().toLocaleDateString('tr-TR', {year:'numeric', month:'long', day:'numeric'});
     const timurImg = (typeof hyperImgPath === 'function') ? hyperImgPath('sanatta-yaklasim-5','1.webp') : '';
 
+    /* Kategori başına eser listesini önden çıkar — hem İçindekiler
+       sayfası hem de asıl bölümler aynı (önbelleklenmiş) veriyi kullanır. */
+    const catPieces = [];
+    for(const cat of cats){
+      const pieces = (typeof loadPieces === 'function') ? await loadPieces(cat.slug) : [];
+      if(pieces.length) catPieces.push({cat, pieces});
+    }
+
     let html = ''
-      + '<div class="catalog-print-frame"></div>'
+      + '<div class="catalog-print-frame">'
+      +   '<span class="catalog-corner tl"></span><span class="catalog-corner tr"></span>'
+      +   '<span class="catalog-corner bl"></span><span class="catalog-corner br"></span>'
+      + '</div>'
       + '<div class="catalog-print-footer">www.bulentiscan.com</div>'
       + '<section class="catalog-cover-page">'
       +   (timurImg ? '<div class="catalog-cover-wm" style="background-image:url(\'' + timurImg + '\')"></div>' : '')
@@ -4321,9 +4377,19 @@ document.addEventListener('dragstart', e=>{
       +   '</div>'
       + '</section>';
 
-    for(const cat of cats){
-      const pieces = (typeof loadPieces === 'function') ? await loadPieces(cat.slug) : [];
-      if(!pieces.length) continue;
+    /* İçindekiler */
+    html += '<section class="catalog-toc">'
+      + '<h2>İçindekiler</h2>'
+      + '<ul class="catalog-toc-list">'
+      +   catPieces.map(({cat, pieces}) => ''
+            + '<li><span class="toc-name">' + escapeHtml(cat.name) + '</span>'
+            + '<span class="toc-dots"></span>'
+            + '<span class="toc-count">' + pieces.length + ' eser</span></li>'
+          ).join('')
+      + '</ul>'
+      + '</section>';
+
+    for(const {cat, pieces} of catPieces){
       const introP = (cat.intro && cat.intro.paragraphs && cat.intro.paragraphs[0]) || '';
       const wmFile = pieces[0].file;
       const wmSrc = imgPath(cat.slug, wmFile);
@@ -4353,6 +4419,23 @@ document.addEventListener('dragstart', e=>{
           + '</div></section>';
       }
     }
+
+    /* Arka kapak */
+    html += '<section class="catalog-back-page">'
+      +   (timurImg ? '<div class="catalog-cover-wm" style="background-image:url(\'' + timurImg + '\')"></div>' : '')
+      +   '<div class="catalog-back-inner">'
+      +     '<img src="assets/main/logo.webp" alt="bisanat logo">'
+      +     '<h2>Teşekkür Ederiz</h2>'
+      +     '<p class="catalog-back-thanks">Bu katalogda yer alan eserler, Bülent ve Şenay İşcan atölyesinde '
+      +       'özenle hazırlanmıştır. Sorularınız ve proje talepleriniz için bize ulaşabilirsiniz.</p>'
+      +     '<div class="catalog-back-contact">'
+      +       '<div>WhatsApp: +90 530 202 10 12</div>'
+      +       '<div>E-posta: iscan.senay@gmail.com</div>'
+      +       '<div>Ataşehir Atölyesi — İstanbul · Şalgamlı Atölyesi — Tekirdağ</div>'
+      +     '</div>'
+      +     '<div class="catalog-back-site">www.bulentiscan.com</div>'
+      +   '</div>'
+      + '</section>';
 
     return html;
   }
