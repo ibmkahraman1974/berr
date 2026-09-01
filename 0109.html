@@ -753,20 +753,20 @@
 .catalog-chapter-inner h2{font-family:'Cormorant Garamond',serif;font-weight:600;font-size:30px;
   color:var(--gold-2);margin-bottom:16px}
 .catalog-chapter-inner p{font-family:'Cormorant Garamond',serif;font-style:italic;font-size:15px;
-  color:var(--text-soft);line-height:1.85}
+  color:var(--text-soft);line-height:1.85;text-align:justify;text-justify:inter-word;hyphens:auto}
 .catalog-chapter-inner .catalog-count{font-family:'Montserrat';font-style:normal;font-size:10.5px;
   letter-spacing:2.5px;text-transform:uppercase;color:var(--gold-3);margin-top:16px}
 
-/* Kategori içi eser listesi: her görselin altında başlık + açıklama */
-.catalog-works{page-break-after:always;padding-top:6mm}
-.catalog-work-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:22px 20px}
-.catalog-work{break-inside:avoid;margin-bottom:8px}
-.catalog-work .catalog-work-img{width:100%;aspect-ratio:4/5;object-fit:cover;display:block;
+/* Kategori içi eser listesi: her sayfada 6 görsel (3x2), altında tam başlık + açıklama */
+.catalog-works{page-break-after:always;page-break-inside:avoid;padding:10mm 0}
+.catalog-work-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:22px 18px;align-items:start}
+.catalog-work{break-inside:avoid;display:flex;flex-direction:column}
+.catalog-work .catalog-work-img{width:100%;aspect-ratio:1/1;object-fit:cover;display:block;
   border:1px solid rgba(138,106,44,.4);border-radius:4px;background:linear-gradient(160deg,#ece2c8,#d9caa4)}
-.catalog-work h4{font-family:'Cormorant Garamond',serif;font-weight:600;font-size:12.5px;
-  color:var(--cream);margin:7px 0 3px;line-height:1.3}
+.catalog-work h4{font-family:'Cormorant Garamond',serif;font-weight:600;font-size:12px;
+  color:var(--cream);margin:8px 0 3px;line-height:1.3}
 .catalog-work p{font-family:'Montserrat';font-size:8.5px;line-height:1.55;color:var(--text-soft);
-  white-space:pre-line}
+  white-space:pre-line;text-align:justify;text-justify:inter-word;hyphens:auto}
 
 /* ===================== ADMIN PANEL ===================== */
 .seal{cursor:pointer;user-select:none;-webkit-user-select:none}
@@ -4279,14 +4279,27 @@ document.addEventListener('dragstart', e=>{
     return String(s || '').replace(/[&<>]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));
   }
 
-  /* Aynı NFC/NFD normalizasyon düzeltmesi galeri ile aynı mantıkla */
-  function attachImgFallback(img, slug, file){
-    img.dataset.fbStep = '0';
-    img.addEventListener('error', function(){
-      const step = img.dataset.fbStep;
-      if(step === '0'){ img.dataset.fbStep = '1'; img.src = imgPath(slug, file.normalize('NFD')); }
-      else if(step === '1'){ img.dataset.fbStep = '2'; img.src = imgPath(slug, file.normalize('NFC')); }
-      else { img.style.visibility = 'hidden'; }
+  /* Bir görseli, NFC/NFD düzeltmeli deneme zinciri TAMAMEN bitene kadar
+     (başarı ya da 3 denemenin tükenmesiyle) çözülen TEK bir Promise
+     olarak yükler. Önceki sürümde "load" ve "error" için ayrı ayrı
+     dinleyici eklenmesi, ilk hata anında (henüz yeniden deneme
+     sürerken) bekleme Promise'inin ERKEN çözülmesine — dolayısıyla
+     yazdırma penceresinin bazı görseller tam yüklenmeden açılmasına
+     ve uzun/başarısız yüklemelere yol açıyordu. */
+  function loadImage(img, slug, file, onProgress){
+    return new Promise(resolve=>{
+      let step = 0;
+      function attempt(path){
+        img.onload = ()=>{ onProgress(); resolve(); };
+        img.onerror = ()=>{
+          step++;
+          if(step === 1) attempt(imgPath(slug, file.normalize('NFD')));
+          else if(step === 2) attempt(imgPath(slug, file.normalize('NFC')));
+          else { img.style.visibility = 'hidden'; onProgress(); resolve(); }
+        };
+        img.src = path;
+      }
+      attempt(imgPath(slug, file));
     });
   }
 
@@ -4324,16 +4337,21 @@ document.addEventListener('dragstart', e=>{
         + '</div>'
         + '</section>';
 
-      html += '<section class="catalog-works"><div class="catalog-work-grid">'
-        + pieces.map(p => ''
-            + '<div class="catalog-work">'
-            +   '<img class="catalog-work-img" data-slug="' + cat.slug + '" data-file="' + escapeHtml(p.file) + '" '
-            +     'src="' + imgPath(cat.slug, p.file) + '" alt="' + escapeHtml(p.title) + '">'
-            +   '<h4>' + escapeHtml(p.title) + '</h4>'
-            +   (p.desc ? '<p>' + escapeHtml(p.desc) + '</p>' : '')
-            + '</div>'
-          ).join('')
-        + '</div></section>';
+      const workHtml = p => ''
+        + '<div class="catalog-work">'
+        +   '<img class="catalog-work-img" data-slug="' + cat.slug + '" data-file="' + escapeHtml(p.file) + '" '
+        +     'alt="' + escapeHtml(p.title) + '">'
+        +   '<h4>' + escapeHtml(p.title) + '</h4>'
+        +   (p.desc ? '<p>' + escapeHtml(p.desc) + '</p>' : '')
+        + '</div>';
+
+      /* Her sayfada tam 6 görsel (3x2) olacak şekilde grupla */
+      for(let i = 0; i < pieces.length; i += 6){
+        const pageSlice = pieces.slice(i, i + 6);
+        html += '<section class="catalog-works"><div class="catalog-work-grid">'
+          + pageSlice.map(workHtml).join('')
+          + '</div></section>';
+      }
     }
 
     return html;
@@ -4342,26 +4360,27 @@ document.addEventListener('dragstart', e=>{
   btn.addEventListener('click', async function(){
     const originalLabel = btn.textContent;
     btn.disabled = true;
-    btn.textContent = 'Hazırlanıyor…';
+    btn.textContent = 'Kategoriler hazırlanıyor…';
 
     target.innerHTML = await buildCatalogHtml();
 
-    /* Kapak/bölüm fligranları CSS background-image; sayfa görselleri <img>.
-       Yazdırma penceresi, bütün <img> etiketleri yüklenmeden açılmasın. */
-    target.querySelectorAll('.catalog-work-img').forEach(img=>{
-      attachImgFallback(img, img.dataset.slug, img.dataset.file);
-    });
-    const imgs = Array.from(target.querySelectorAll('img'));
-    const waits = imgs.map(img => img.complete ? Promise.resolve() : new Promise(res=>{
-      img.addEventListener('load', res, {once:true});
-      img.addEventListener('error', res, {once:true});
-    }));
+    const imgs = Array.from(target.querySelectorAll('.catalog-work-img'));
+    const total = imgs.length;
+    let loaded = 0;
+    const updateProgress = () => {
+      loaded++;
+      btn.textContent = 'Görseller yükleniyor… (' + loaded + ' / ' + total + ')';
+    };
+    btn.textContent = 'Görseller yükleniyor… (0 / ' + total + ')';
+    const waits = imgs.map(img => loadImage(img, img.dataset.slug, img.dataset.file, updateProgress));
 
     /* Üstteki tarayıcı başlığı/tarih ve alttaki dosya yolu, sayfanın kendi
        kodundan değil tarayıcının "Üstbilgiler ve altbilgiler" ayarından
-       gelir. Başlığı geçici olarak sadeleştiriyoruz; tamamen kaldırmak için
-       yazdırma penceresinde "Diğer ayarlar" > "Üstbilgiler ve altbilgiler"
-       seçeneğini kapatman gerekiyor. */
+       gelir; koddan kapatılamaz. Yazdırma penceresi açıldığında
+       "Diğer ayarlar" (More settings) > "Üstbilgiler ve altbilgiler"
+       (Headers and footers) seçeneğini KAPATMAN gerekiyor — aksi halde
+       tarih/dosya yolu görünmeye devam eder. Başlığı geçici olarak
+       sadeleştiriyoruz ki açık kalırsa bile daha az göze batsın. */
     const prevTitle = document.title;
     document.title = ' ';
     function restoreTitle(){
@@ -4370,9 +4389,15 @@ document.addEventListener('dragstart', e=>{
     }
     window.addEventListener('afterprint', restoreTitle);
 
+    /* Artık erken kesme YOK: gerçekten tüm görseller yüklenene (veya
+       kesin olarak başarısız olup gizlenene) kadar bekliyoruz — önceki
+       6 saniyelik "güvenlik ağı" büyük kataloglarda görseller daha
+       inmeden yazdırmayı tetikleyip hem "bozuk görsel" hem de yarım
+       kalmış gibi görünen bir PDF'e yol açıyordu. 90 sn'lik üst sınır
+       yalnızca gerçekten donan bir bağlantıya karşı son çare. */
     Promise.race([
       Promise.all(waits),
-      new Promise(res => setTimeout(res, 6000)) /* güvenlik ağı: çok sayıda görselde takılı kalmasın */
+      new Promise(res => setTimeout(res, 90000))
     ]).then(()=>{
       btn.disabled = false;
       btn.textContent = originalLabel;
