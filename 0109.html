@@ -638,7 +638,7 @@
 
   /* İletişim */
   .contact-card{max-width:760px;margin:0 auto;padding:44px 48px;border-radius:8px;background:var(--card);
-    border:5px solid transparent;border-image:var(--ribbon-frame) 1;
+    border:1px solid rgba(138,106,44,.35);
     box-shadow:0 22px 44px -20px rgba(0,0,0,.5);text-align:center}
   .contact-card p.big{font-family:'Cormorant Garamond',serif;font-style:italic;font-size:24px;color:var(--gold-2);margin-bottom:28px}
   .c-row{display:flex;justify-content:center;gap:34px;flex-wrap:wrap;margin-bottom:28px;font-size:14px;color:var(--text-soft)}
@@ -650,7 +650,7 @@
   /* İki adres + harita */
   .contact-locations{max-width:1100px;margin:40px auto 0;display:grid;grid-template-columns:1fr 1fr;gap:28px}
   .loc-card{background:var(--card);border-radius:8px;overflow:hidden;text-align:left;
-    border:5px solid transparent;border-image:var(--ribbon-frame) 1;
+    border:1px solid rgba(138,106,44,.35);
     box-shadow:0 18px 38px -20px rgba(0,0,0,.45);display:flex;flex-direction:column}
   .loc-card-head{padding:20px 24px 14px}
   .loc-tag{font-size:10.5px;letter-spacing:2.5px;text-transform:uppercase;color:var(--gold-2);margin-bottom:8px}
@@ -692,6 +692,81 @@
   .footer-logo-inline img{width:62px;height:62px;object-fit:contain;border-radius:12px;display:block}
   .footer-logo-inline:hover{transform:scale(1.22);box-shadow:0 15px 34px -11px rgba(201,150,46,.7)}
   .footer-logo-inline:active{transform:scale(1.09)}
+
+/* ===================== KATALOG (PDF) ===================== */
+.wa-btn-outline{display:inline-block;margin-left:12px;padding:14px 32px;border-radius:6px;
+  background:transparent;border:1px solid var(--gold-2);color:var(--gold-2);
+  letter-spacing:1.5px;font-size:13px;text-transform:uppercase;text-decoration:none;cursor:pointer;
+  font-family:'Montserrat',sans-serif;font-weight:400;transition:.25s}
+.wa-btn-outline:hover{background:rgba(201,150,46,.1);color:var(--cream)}
+@media(max-width:480px){.wa-btn-outline{display:block;margin:14px auto 0;max-width:280px}}
+
+/* Ekranda gizli; yalnızca "Kataloğu İndir" tıklandığında doldurulup yazdırılır.
+   Kullanıcı tarayıcının yazdırma penceresinden "PDF olarak kaydet" seçer —
+   ek kütüphane veya font gömme derdi olmadan, Türkçe karakterler dahil
+   sitenin kendi tipografisiyle birebir örtüşen bir katalog üretir. */
+#catalogPrint{display:none}
+@media print{
+  html, body{
+    background:radial-gradient(1200px 500px at 15% -10%, #f1e2b8 0%, transparent 60%),
+      linear-gradient(160deg, var(--bg-0) 0%, var(--bg-1) 45%, var(--bg-2) 100%) !important;
+  }
+  body *{visibility:hidden}
+  #catalogPrint, #catalogPrint *{visibility:visible}
+  #catalogPrint{
+    display:block;position:absolute;left:0;top:0;width:100%;
+    background:radial-gradient(1200px 500px at 15% -10%, #f1e2b8 0%, transparent 60%),
+      linear-gradient(160deg, var(--bg-0) 0%, var(--bg-1) 45%, var(--bg-2) 100%);
+  }
+  *{ -webkit-print-color-adjust:exact; print-color-adjust:exact; }
+  @page{ margin:20mm 15mm; }
+  .catalog-print-frame,.catalog-print-footer{display:block}
+}
+/* Her fiziksel sayfada tekrar eden altın "kitap baskısı" çerçevesi ve
+   alt-orta site adresi — position:fixed sayesinde her sayfada yeniden çizilir. */
+.catalog-print-frame{display:none;position:fixed;top:7mm;left:7mm;right:7mm;bottom:7mm;
+  border:2px solid var(--gold-2);pointer-events:none;z-index:80}
+.catalog-print-frame::before{content:"";position:absolute;inset:5px;border:1px solid rgba(138,106,44,.55)}
+.catalog-print-footer{display:none;position:fixed;bottom:2.5mm;left:0;right:0;text-align:center;
+  font-family:'Montserrat';font-size:9px;letter-spacing:2.5px;color:var(--gold-3);z-index:80}
+
+/* Kapak sayfası */
+.catalog-cover-page{position:relative;min-height:96vh;display:flex;align-items:center;justify-content:center;
+  text-align:center;page-break-after:always;overflow:hidden}
+.catalog-cover-wm{position:absolute;inset:-4%;background-size:cover;background-position:center 25%;
+  opacity:.17;filter:grayscale(20%) sepia(10%)}
+.catalog-cover-inner{position:relative;z-index:1;padding:40px;max-width:560px}
+.catalog-cover-inner img{width:104px;height:104px;object-fit:contain;margin-bottom:22px}
+.catalog-cover-inner .catalog-eyebrow{font-family:'Montserrat';font-size:12px;letter-spacing:5px;
+  text-transform:uppercase;color:var(--gold-2);margin-bottom:22px}
+.catalog-cover-inner h1{font-family:'Cormorant Garamond',serif;font-style:italic;font-weight:600;
+  font-size:32px;line-height:1.4;color:var(--gold-2)}
+.catalog-cover-inner .catalog-date{font-family:'Montserrat';font-size:10.5px;letter-spacing:1px;
+  color:var(--text-muted);margin-top:22px}
+
+/* Kategori bölüm-açılış sayfası (fligranlı) */
+.catalog-chapter{position:relative;min-height:92vh;display:flex;align-items:center;justify-content:center;
+  text-align:center;page-break-before:always;page-break-after:always;overflow:hidden;padding:40px}
+.catalog-chapter-wm{position:absolute;inset:-4%;background-size:cover;background-position:center;
+  opacity:.15;filter:grayscale(25%) sepia(8%)}
+.catalog-chapter-inner{position:relative;z-index:1;max-width:600px}
+.catalog-chapter-inner h2{font-family:'Cormorant Garamond',serif;font-weight:600;font-size:30px;
+  color:var(--gold-2);margin-bottom:16px}
+.catalog-chapter-inner p{font-family:'Cormorant Garamond',serif;font-style:italic;font-size:15px;
+  color:var(--text-soft);line-height:1.85}
+.catalog-chapter-inner .catalog-count{font-family:'Montserrat';font-style:normal;font-size:10.5px;
+  letter-spacing:2.5px;text-transform:uppercase;color:var(--gold-3);margin-top:16px}
+
+/* Kategori içi eser listesi: her görselin altında başlık + açıklama */
+.catalog-works{page-break-after:always;padding-top:6mm}
+.catalog-work-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:22px 20px}
+.catalog-work{break-inside:avoid;margin-bottom:8px}
+.catalog-work .catalog-work-img{width:100%;aspect-ratio:4/5;object-fit:cover;display:block;
+  border:1px solid rgba(138,106,44,.4);border-radius:4px;background:linear-gradient(160deg,#ece2c8,#d9caa4)}
+.catalog-work h4{font-family:'Cormorant Garamond',serif;font-weight:600;font-size:12.5px;
+  color:var(--cream);margin:7px 0 3px;line-height:1.3}
+.catalog-work p{font-family:'Montserrat';font-size:8.5px;line-height:1.55;color:var(--text-soft);
+  white-space:pre-line}
 
 /* ===================== ADMIN PANEL ===================== */
 .seal{cursor:pointer;user-select:none;-webkit-user-select:none}
@@ -1438,6 +1513,7 @@ body.intro-lock{overflow:hidden}
       <a href="tel:+905302021012">☎ +90 530 202 10 12</a>
     </div>
     <a class="wa-btn" href="https://wa.me/905302021012" target="_blank">WhatsApp'tan Görüşün</a>
+    <button type="button" class="wa-btn-outline" id="catalogDownloadBtn">Kataloğu İndir (PDF)</button>
   </div>
 
   <div class="contact-locations">
@@ -1466,6 +1542,8 @@ body.intro-lock{overflow:hidden}
     </div>
   </div>
 </section>
+
+<div id="catalogPrint"></div>
 
 <footer id="siteFooter">© 2026 bisanat — Bülent &amp; Şenay İşcan Atölyesi <a class="footer-logo-inline" href="https://wa.me/905412920822" target="_blank" rel="noopener" aria-label="WhatsApp ile iletişime geçin"><img src="assets/main/ibmkahraman.webp" alt="bisanat logo" loading="lazy" decoding="async"></a> · Tüm eserler telif hakkı ile korunmaktadır.</footer>
 
@@ -4183,6 +4261,124 @@ document.addEventListener('dragstart', e=>{
   });
 
   document.addEventListener('mouseleave', ()=> cursor.classList.remove('active'));
+})();
+</script>
+
+<!-- ==== Kataloğu İndir (PDF): mevcut eser verisinden, gerçek görsellerle
+     tam bir yazdırılabilir katalog üretir. Kapak = Timur heykeli fligranı,
+     her kategori kendi görseliyle yeni sayfada açılır, altın "kitap
+     baskısı" çerçevesi ve alt-orta site adresi her fiziksel sayfada
+     tekrarlanır (position:fixed). ==== -->
+<script>
+(function(){
+  const btn = document.getElementById('catalogDownloadBtn');
+  const target = document.getElementById('catalogPrint');
+  if(!btn || !target) return;
+
+  function escapeHtml(s){
+    return String(s || '').replace(/[&<>]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));
+  }
+
+  /* Aynı NFC/NFD normalizasyon düzeltmesi galeri ile aynı mantıkla */
+  function attachImgFallback(img, slug, file){
+    img.dataset.fbStep = '0';
+    img.addEventListener('error', function(){
+      const step = img.dataset.fbStep;
+      if(step === '0'){ img.dataset.fbStep = '1'; img.src = imgPath(slug, file.normalize('NFD')); }
+      else if(step === '1'){ img.dataset.fbStep = '2'; img.src = imgPath(slug, file.normalize('NFC')); }
+      else { img.style.visibility = 'hidden'; }
+    });
+  }
+
+  async function buildCatalogHtml(){
+    const cats = (typeof CATEGORIES !== 'undefined' && CATEGORIES) || [];
+    const today = new Date().toLocaleDateString('tr-TR', {year:'numeric', month:'long', day:'numeric'});
+    const timurImg = (typeof hyperImgPath === 'function') ? hyperImgPath('sanatta-yaklasim-5','1.webp') : '';
+
+    let html = ''
+      + '<div class="catalog-print-frame"></div>'
+      + '<div class="catalog-print-footer">www.bulentiscan.com</div>'
+      + '<section class="catalog-cover-page">'
+      +   (timurImg ? '<div class="catalog-cover-wm" style="background-image:url(\'' + timurImg + '\')"></div>' : '')
+      +   '<div class="catalog-cover-inner">'
+      +     '<img src="assets/main/logo.webp" alt="bisanat logo">'
+      +     '<div class="catalog-eyebrow">bisanat atölyesi</div>'
+      +     '<h1>Bülent İşcan &amp; Şenay İşcan<br>Atölyesi Eser Kataloğu</h1>'
+      +     '<p class="catalog-date">' + today + '</p>'
+      +   '</div>'
+      + '</section>';
+
+    for(const cat of cats){
+      const pieces = (typeof loadPieces === 'function') ? await loadPieces(cat.slug) : [];
+      if(!pieces.length) continue;
+      const introP = (cat.intro && cat.intro.paragraphs && cat.intro.paragraphs[0]) || '';
+      const wmFile = pieces[0].file;
+      const wmSrc = imgPath(cat.slug, wmFile);
+
+      html += '<section class="catalog-chapter">'
+        + '<div class="catalog-chapter-wm" style="background-image:url(\'' + wmSrc + '\')"></div>'
+        + '<div class="catalog-chapter-inner">'
+        +   '<h2>' + escapeHtml(cat.name) + '</h2>'
+        +   (introP ? '<p>' + escapeHtml(introP) + '</p>' : '')
+        +   '<p class="catalog-count">' + pieces.length + ' eser</p>'
+        + '</div>'
+        + '</section>';
+
+      html += '<section class="catalog-works"><div class="catalog-work-grid">'
+        + pieces.map(p => ''
+            + '<div class="catalog-work">'
+            +   '<img class="catalog-work-img" data-slug="' + cat.slug + '" data-file="' + escapeHtml(p.file) + '" '
+            +     'src="' + imgPath(cat.slug, p.file) + '" alt="' + escapeHtml(p.title) + '">'
+            +   '<h4>' + escapeHtml(p.title) + '</h4>'
+            +   (p.desc ? '<p>' + escapeHtml(p.desc) + '</p>' : '')
+            + '</div>'
+          ).join('')
+        + '</div></section>';
+    }
+
+    return html;
+  }
+
+  btn.addEventListener('click', async function(){
+    const originalLabel = btn.textContent;
+    btn.disabled = true;
+    btn.textContent = 'Hazırlanıyor…';
+
+    target.innerHTML = await buildCatalogHtml();
+
+    /* Kapak/bölüm fligranları CSS background-image; sayfa görselleri <img>.
+       Yazdırma penceresi, bütün <img> etiketleri yüklenmeden açılmasın. */
+    target.querySelectorAll('.catalog-work-img').forEach(img=>{
+      attachImgFallback(img, img.dataset.slug, img.dataset.file);
+    });
+    const imgs = Array.from(target.querySelectorAll('img'));
+    const waits = imgs.map(img => img.complete ? Promise.resolve() : new Promise(res=>{
+      img.addEventListener('load', res, {once:true});
+      img.addEventListener('error', res, {once:true});
+    }));
+
+    /* Üstteki tarayıcı başlığı/tarih ve alttaki dosya yolu, sayfanın kendi
+       kodundan değil tarayıcının "Üstbilgiler ve altbilgiler" ayarından
+       gelir. Başlığı geçici olarak sadeleştiriyoruz; tamamen kaldırmak için
+       yazdırma penceresinde "Diğer ayarlar" > "Üstbilgiler ve altbilgiler"
+       seçeneğini kapatman gerekiyor. */
+    const prevTitle = document.title;
+    document.title = ' ';
+    function restoreTitle(){
+      document.title = prevTitle;
+      window.removeEventListener('afterprint', restoreTitle);
+    }
+    window.addEventListener('afterprint', restoreTitle);
+
+    Promise.race([
+      Promise.all(waits),
+      new Promise(res => setTimeout(res, 6000)) /* güvenlik ağı: çok sayıda görselde takılı kalmasın */
+    ]).then(()=>{
+      btn.disabled = false;
+      btn.textContent = originalLabel;
+      requestAnimationFrame(()=> window.print());
+    });
+  });
 })();
 </script>
 </body>
