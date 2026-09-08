@@ -539,19 +539,23 @@
 
   .empty-note{grid-column:1/-1;text-align:center;color:var(--text-muted);font-size:14px;padding:30px 0}
 
-  /* Lightbox / slayt gösterisi — masaüstünde görsel solda, başlık+metin sağda;
-     en altta ortalanmış sayaç/kategori etiketi ile gezinti okları birlikte durur. */
-  .lightbox{position:fixed;inset:0;background:rgba(8,6,3,.98);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);z-index:100;display:none;align-items:center;justify-content:flex-start;flex-direction:column;padding:40px 60px;overflow-y:auto}
+  /* Lightbox / slayt gösterisi — masaüstünde görsel solda, başlık+metin sağda.
+     Görselin konumu ve alt gezinti okları HER sayfada aynı yerde sabit durur;
+     açıklama metni ne kadar uzun olursa olsun bu konumlar değişmez, çünkü
+     görsel ve metin sütunu sabit yükseklikli bir kutuya oturur ve uzun metin
+     kendi içinde (lb-meta) yukarı/aşağı kaydırılarak okunur. Alt gezinti
+     okları ise lb-body akışının dışında, ekrana sabit (position:fixed) konumlanır. */
+  .lightbox{position:fixed;inset:0;background:rgba(8,6,3,.98);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);z-index:100;display:none;align-items:center;justify-content:center;flex-direction:column;padding:40px 60px 104px;overflow:hidden}
   .lightbox.open{display:flex}
 
-  /* Üst blok: görsel (sol) + başlık/paragraf (sağ) */
-  .lb-body{display:flex;flex-wrap:wrap;align-items:center;justify-content:center;column-gap:56px;row-gap:36px;width:100%;max-width:1360px;margin:0 auto}
-  .lb-visual{position:relative;flex:0 1 620px;display:flex;flex-direction:column;align-items:center;justify-content:center;order:1}
+  /* Üst blok: görsel (sol) + başlık/paragraf (sağ) — sabit yükseklik, taşma yok */
+  .lb-body{display:flex;flex-wrap:nowrap;align-items:stretch;justify-content:center;column-gap:56px;width:100%;max-width:1360px;height:70vh;max-height:70vh;margin:0 auto}
+  .lb-visual{position:relative;flex:0 1 620px;display:flex;flex-direction:column;align-items:center;justify-content:center;order:1;height:100%}
 
   .lightbox img{width:auto;height:auto;max-width:100%;max-height:70vh;object-fit:contain;border-radius:6px;box-shadow:0 30px 70px -20px rgba(0,0,0,.8), 0 0 0 1px rgba(212,175,55,.25);border:6px solid transparent;border-image:var(--ribbon-frame) 1;background:#0e0a05;display:block}
   /* Görsel alanı SABİT yükseklikte: açıklama metni ne kadar uzun/kısa olursa
      olsun görsel her zaman bu kutunun ortasında, aynı konumda görünür. */
-  .lb-img-wrap{position:relative;display:flex;align-items:center;justify-content:center;height:70vh;max-height:70vh}
+  .lb-img-wrap{position:relative;display:flex;align-items:center;justify-content:center;height:100%;max-height:70vh}
   /* Görselin gerçek render boyutuna oturan iç sarmalayıcı: filigran (logo + telif)
      bu kutuya göre konumlanır, böylece görselin boş bıraktığı kenarlarda değil
      her zaman fotoğrafın kendi köşesinde kalır. */
@@ -569,15 +573,25 @@
   .lb-fallback .fb-name{font-family:'Cormorant Garamond',serif;font-style:italic;font-size:18px;color:#8a6a2c}
   .lb-fallback .fb-sub{font-size:11px;letter-spacing:1.5px;text-transform:uppercase;color:#8f8168}
 
-  /* Sağ taraf: başlık + paragraf, sola hizalı ve düzenli aralıklı */
-  .lb-meta{flex:1 1 380px;max-width:440px;text-align:left;order:2}
+  /* Sağ taraf: başlık + paragraf, sola hizalı ve düzenli aralıklı.
+     Kutu, görselle aynı sabit yüksekliktedir (lb-body'den miras); metin bu
+     yüksekliği aşarsa kutunun KENDİSİ kaydırılır (dış görünüm/konum sabit kalır). */
+  .lb-meta{flex:1 1 380px;max-width:440px;text-align:left;order:2;height:100%;overflow-y:auto;overflow-x:hidden;
+    padding-right:14px;scrollbar-width:thin;scrollbar-color:rgba(212,175,55,.55) transparent}
+  .lb-meta::-webkit-scrollbar{width:6px}
+  .lb-meta::-webkit-scrollbar-track{background:transparent}
+  .lb-meta::-webkit-scrollbar-thumb{background:rgba(212,175,55,.4);border-radius:3px}
+  .lb-meta::-webkit-scrollbar-thumb:hover{background:rgba(212,175,55,.65)}
   .lb-meta h4{font-family:'Cormorant Garamond',serif;font-weight:600;font-size:30px;line-height:1.28;color:#fff8ea;
     position:relative;padding-bottom:16px;margin-bottom:16px}
   .lb-meta h4::after{content:"";position:absolute;left:0;bottom:0;width:44px;height:2px;background:linear-gradient(90deg,var(--gold-1),var(--gold-3))}
-  .lb-meta p{color:#cdbfa2;font-size:15px;line-height:1.85;white-space:pre-line;text-align:justify;text-justify:inter-word;hyphens:auto}
+  .lb-meta p{color:#cdbfa2;font-size:15px;line-height:1.85;white-space:pre-line;text-align:justify;text-justify:inter-word;hyphens:auto;margin-bottom:8px}
 
-  /* Alt bar: sayfayı ortalayan sayaç/kategori etiketi + gezinti okları bir arada */
-  .lb-footer{display:flex;align-items:center;justify-content:center;gap:22px;margin-top:0;order:3;flex-basis:100%}
+  /* Alt bar: sayaç/kategori etiketi + gezinti okları — lb-body akışının DIŞINDA,
+     ekranın altında sabit (position:fixed). Metin ister kısa ister uzun olsun
+     bu okların konumu hiçbir zaman değişmez. */
+  .lb-footer{position:fixed;left:50%;bottom:28px;transform:translateX(-50%);z-index:6;
+    display:flex;align-items:center;justify-content:center;gap:22px}
   .lb-counter{font-size:11px;letter-spacing:2px;color:var(--gold-1);text-transform:uppercase;text-align:center;min-width:170px}
 
   .lb-close{position:absolute;top:22px;right:30px;background:none;border:none;color:#e8dcc3;font-size:34px;cursor:pointer;line-height:1;opacity:.85;z-index:5}
@@ -591,31 +605,33 @@
     .lb-meta h4{font-size:25px}
   }
   @media (max-width:900px){
-    /* Dar ekranlarda görsel üstte, hemen altında gezinti okları,
-       ardından başlık/metin — hepsi ortalı (mobil düzen) */
-    .lb-body{flex-direction:column;max-width:640px;row-gap:16px}
-    .lb-visual{flex-basis:auto;width:100%;order:1}
-    .lb-footer{order:2;flex-basis:auto}
-    .lb-img-wrap{height:56vh;max-height:56vh}
-    .lightbox img{max-height:56vh;max-width:88vw}
-    .lb-meta{max-width:100%;text-align:center;margin-top:24px;order:3}
+    /* Dar ekranlarda görsel üstte, başlık/metin altta (kaydırılabilir) —
+       gezinti okları yine ekranın altında sabit kalır (mobil düzen) */
+    .lightbox{padding:36px 20px 96px}
+    .lb-body{flex-direction:column;column-gap:0;row-gap:16px;max-width:640px;height:auto;max-height:100%}
+    .lb-visual{flex-basis:auto;width:100%;height:48vh;order:1}
+    .lb-img-wrap{height:48vh;max-height:48vh}
+    .lightbox img{max-height:48vh;max-width:88vw}
+    .lb-meta{max-width:100%;width:100%;text-align:center;order:2;flex:1 1 auto;height:auto;
+      max-height:calc(100vh - 48vh - 96px - 72px);padding-right:0}
     .lb-meta h4{text-align:center}
     .lb-meta h4::after{left:50%;transform:translateX(-50%)}
     .lb-meta p{text-align:justify;text-justify:inter-word;hyphens:auto}
   }
   @media (max-width:640px){
-    /* Mobil tam ekran galeri: her şey ekrana sığsın */
-    .lightbox{padding:56px 14px 24px;overflow-y:auto}
+    /* Mobil tam ekran galeri: her şey ekrana sığsın, alt oklar yine sabit */
+    .lightbox{padding:56px 14px 86px}
     .lb-close{position:fixed;top:12px;right:14px;font-size:30px;z-index:120;
       width:44px;height:44px;display:flex;align-items:center;justify-content:center;
       background:rgba(0,0,0,.45);border-radius:50%;opacity:1}
-    .lb-img-wrap{height:52vh;max-height:52vh}
-    .lightbox img{max-height:52vh;max-width:88vw}
+    .lb-visual{height:42vh}
+    .lb-img-wrap{height:42vh;max-height:42vh}
+    .lightbox img{max-height:42vh;max-width:88vw}
     .lb-fallback{width:88vw}
-    .lb-meta{margin-top:18px}
+    .lb-meta{max-height:calc(100vh - 42vh - 86px - 66px)}
     .lb-meta h4{font-size:19px;padding-bottom:12px;margin-bottom:12px}
     .lb-meta p{font-size:12.5px;line-height:1.6}
-    .lb-footer{gap:16px}
+    .lb-footer{gap:16px;bottom:18px}
     .lb-nav{width:40px;height:40px;font-size:15px}
     .lb-counter{font-size:10px;min-width:auto}
   }
