@@ -1,0 +1,7 @@
+{
+  "appId": "com.kodex.kendikahramanin",
+  "appName": "Kendi Kahramanın",
+  "webDir": "www",
+  "backgroundColor": "#2b1a4a",
+  "android": { "allowMixedContent": false }
+}
